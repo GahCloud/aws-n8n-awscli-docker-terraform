@@ -1,0 +1,425 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -540,
+        -300
+      ],
+      "id": "94493c20-2da0-42a6-8884-1d17ce5ef1d8",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "aws ce get-cost-and-usage \\\n  --time-period Start=$(date -u -d \"2025-06-01\" +%Y-%m-%d),End=$(date -u -d \"2025-07-01\" +%Y-%m-%d) \\\n  --granularity=DAILY \\\n  --metrics UnblendedCost \\\n  --group-by Type=DIMENSION,Key=LINKED_ACCOUNT\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -360
+      ],
+      "id": "1a37909f-a3bc-41d6-9a51-1ba2dc118d29",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.item.json.stdout; // string JSON aninhada\n\ntry {\n  const parsedData = JSON.parse(inputData); // parse para array de arrays\n  \n  // parsedData é um array de arrays de objetos, exemplo: [[{...}, {...}, ...]]\n  // Vamos achatar para um array único de objetos\n  const flatList = parsedData.flat(); // achata um nível (concatena subarrays)\n  \n  // Mapeia cada objeto para a estrutura desejada (pode manter todos campos ou só alguns)\n  const tableData = flatList.map(item => ({\n    ID: item.ID,\n    Tipo: item.Tipo,\n    Estado: item.Estado,\n    AZ: item.AZ,\n    Lancamento: item.Lancamento,\n    KeyName: item.KeyName,\n    PublicIP: item.PublicIP,\n    PrivateIP: item.PrivateIP,\n    Tags: item.Tags,\n  }));\n  \n  return tableData; // retorna array para ser usado em Excel ou tabela\n  \n} catch (error) {\n  console.error(\"Erro ao fazer parse do JSON:\", error);\n  return [];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "4b72c86d-cac9-4d15-856a-eb8ed7d0694b",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAQAOD4TkW0/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=qS3qTiRHSPy5_QwqZW661oxjdMM8-hSzM-lq9dNNRf4",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "RAW",
+        "body": "={\n  \"text\": \"✅ Os custos da planilha foram preenchidos com sucesso!\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        -220
+      ],
+      "id": "62519265-468b-4c89-8ab3-9908c3119a01",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -260
+      ],
+      "id": "35f4a037-5056-4dbf-af70-dc89873ab7d4",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "command": "aws ec2 describe-instances \\\n    --region sa-east-1 \\\n    --query 'Reservations[*].Instances[*].{ID:InstanceId,Tipo:InstanceType,Estado:State.Name,AZ:Placement.AvailabilityZone,Lancamento:LaunchTime,KeyName:KeyName,PublicIP:PublicIpAddress,PrivateIP:PrivateIpAddress,Tags:Tags[?Key==`Name`]|Value[] || `N/A`}'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        -140
+      ],
+      "id": "171a6a5c-9164-4064-9efc-db6cb10c3e1d",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1iBA34tMcIU1QmHlirSyAnwo1krq0iniLZZhtcb9gpCM",
+          "mode": "list",
+          "cachedResultName": "Costs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iBA34tMcIU1QmHlirSyAnwo1krq0iniLZZhtcb9gpCM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iBA34tMcIU1QmHlirSyAnwo1krq0iniLZZhtcb9gpCM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tipo",
+              "displayName": "Tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AZ",
+              "displayName": "AZ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lancamento",
+              "displayName": "Lancamento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "KeyName",
+              "displayName": "KeyName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "PublicIP",
+              "displayName": "PublicIP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "PrivateIP",
+              "displayName": "PrivateIP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tags",
+              "displayName": "Tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -20,
+        -260
+      ],
+      "id": "44231f4d-6d4f-4d19-9478-c195f5aa9fce",
+      "name": "Append or update row in sheet",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "V8FMWNfaiC73dINO",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1iBA34tMcIU1QmHlirSyAnwo1krq0iniLZZhtcb9gpCM",
+          "mode": "list",
+          "cachedResultName": "Costs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iBA34tMcIU1QmHlirSyAnwo1krq0iniLZZhtcb9gpCM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iBA34tMcIU1QmHlirSyAnwo1krq0iniLZZhtcb9gpCM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tipo",
+              "displayName": "Tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AZ",
+              "displayName": "AZ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lancamento",
+              "displayName": "Lancamento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "KeyName",
+              "displayName": "KeyName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PublicIP",
+              "displayName": "PublicIP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PrivateIP",
+              "displayName": "PrivateIP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tags",
+              "displayName": "Tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -40,
+        0
+      ],
+      "id": "2bffa3f4-fda7-4463-a2ce-2e728a104486",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "V8FMWNfaiC73dINO",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        []
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        []
+      ]
+    },
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0aee3820-fefd-4037-b64d-6ca9758bcc86",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e51299e835d1e78cc66d8d00d214cd2a6323921a5ba3de856cb253ce04d77055"
+  },
+  "id": "1BFeTnJjYhsgcMQN",
+  "tags": []
+}
