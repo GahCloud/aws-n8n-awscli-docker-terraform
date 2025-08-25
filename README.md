@@ -4,7 +4,7 @@ Automatize fluxos com n8n e AWS CLI em um container Docker provisionado via Terr
 
 ## Principais Recursos
 
-- **Infraestrutura automatizada:** EC2 criada e configurada com Terraform.
+- **Infraestrutura automatizada:** EC2 (tipo: `t2.micro`) criada e configurada com Terraform.
 - **Container customizado:** n8n + AWS CLI para automações integradas.
 - **Persistência:** Dados do n8n salvos em volume Docker.
 - **Logs detalhados:** Facilita monitoramento e depuração.
