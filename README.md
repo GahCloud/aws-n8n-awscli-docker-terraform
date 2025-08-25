@@ -1,13 +1,31 @@
-Projeto: Integração n8n, awscli, google sheets e chats/gmail
+# n8n + AWS CLI Docker Container via Terraform
 
-## Objetivo
-Enviar mensagens automáticas ao Google Chat/Gmail via API usando n8n.
+Este projeto utiliza Terraform para provisionar uma instância EC2 na AWS que executa um container Docker com o [n8n](https://n8n.io/) e o AWS CLI instalados.
 
-## Etapas
-1. Conectar na aws fazer a requisição via cli no cost explorer coletando os dados por conta.
+## Funcionalidades
 
-2. Manipular o retorno para a pontuação brasileira trocando , por nada e depois . por ,.
+- **Provisionamento automatizado:** Utiliza Terraform para criar e configurar a infraestrutura na AWS.
+- **Container customizado:** O container inclui o n8n e o AWS CLI, permitindo automações que interagem diretamente com serviços AWS.
+- **Persistência de dados:** Os dados do n8n são armazenados em um volume Docker.
+- **Logs detalhados:** Toda a configuração é registrada para facilitar depuração.
 
-3. Gravar no google sheets atualizando os valores na planilha existente.
+## Como funciona
 
-4. Envia mensagem no chats ou email que a tarefa foi executada.
+1. O Terraform cria uma instância EC2 e aplica um script de inicialização (user-data).
+2. O script instala Docker, Docker Compose e configura o ambiente.
+3. Um Dockerfile customizado instala o AWS CLI dentro do container n8n.
+4. O docker-compose.yml define o serviço n8n, expõe a porta 5678 e monta o volume de dados.
+5. O container é iniciado automaticamente.
+
+## Pré-requisitos
+
+- [Terraform](https://www.terraform.io/)
+- Conta AWS com permissões para criar recursos EC2
+
+## Uso
+
+1. Clone este repositório.
+2. Configure suas credenciais AWS.
+3. Execute `terraform init` e `terraform apply`.
+4. Acesse o n8n via `http://<IP-da-instância>:5678`.
+
