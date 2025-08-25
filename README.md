@@ -1,31 +1,27 @@
-# n8n + AWS CLI Docker Container via Terraform
+# n8n + AWS CLI via Docker & Terraform
 
-Este projeto utiliza Terraform para provisionar uma instância EC2 na AWS que executa um container Docker com o [n8n](https://n8n.io/) e o AWS CLI instalados.
+Automatize fluxos com n8n e AWS CLI em um container Docker provisionado via Terraform na AWS.
 
-## Funcionalidades
+## Principais Recursos
 
-- **Provisionamento automatizado:** Utiliza Terraform para criar e configurar a infraestrutura na AWS.
-- **Container customizado:** O container inclui o n8n e o AWS CLI, permitindo automações que interagem diretamente com serviços AWS.
-- **Persistência de dados:** Os dados do n8n são armazenados em um volume Docker.
-- **Logs detalhados:** Toda a configuração é registrada para facilitar depuração.
+- **Infraestrutura automatizada:** EC2 criada e configurada com Terraform.
+- **Container customizado:** n8n + AWS CLI para automações integradas.
+- **Persistência:** Dados do n8n salvos em volume Docker.
+- **Logs detalhados:** Facilita monitoramento e depuração.
 
-## Como funciona
+## Como Usar
 
-1. O Terraform cria uma instância EC2 e aplica um script de inicialização (user-data).
-2. O script instala Docker, Docker Compose e configura o ambiente.
-3. Um Dockerfile customizado instala o AWS CLI dentro do container n8n.
-4. O docker-compose.yml define o serviço n8n, expõe a porta 5678 e monta o volume de dados.
-5. O container é iniciado automaticamente.
+1. Clone o repositório.
+2. Configure suas credenciais AWS.
+3. Execute:
+    ```sh
+    terraform init
+    terraform apply
+    ```
+4. Acesse: `http://<IP-da-instância>:5678`
 
 ## Pré-requisitos
 
 - [Terraform](https://www.terraform.io/)
-- Conta AWS com permissões para criar recursos EC2
-
-## Uso
-
-1. Clone este repositório.
-2. Configure suas credenciais AWS.
-3. Execute `terraform init` e `terraform apply`.
-4. Acesse o n8n via `http://<IP-da-instância>:5678`.
+- Conta AWS com permissão para EC2
 
